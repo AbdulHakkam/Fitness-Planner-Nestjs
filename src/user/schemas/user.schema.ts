@@ -2,9 +2,27 @@ import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 
 export class Workout {
   @Prop()
-  workout_id: string;
+  id: string;
+
   @Prop()
-  workout: string[];
+  weight?: number;
+
+  @Prop()
+  sets: number;
+
+  @Prop()
+  rest_time: number;
+}
+
+export class WorkoutPlans {
+  @Prop()
+  workout_id: string;
+
+  @Prop()
+  workout_name: string;
+
+  @Prop()
+  workout: Workout[];
 }
 
 @Schema({
@@ -15,7 +33,7 @@ export class User {
   user_id: string;
 
   @Prop()
-  workout_plans: Workout[];
+  workout_plans: WorkoutPlans[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

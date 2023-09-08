@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Query, QueryOptions } from 'mongoose';
-import { User, Workout } from './schemas/user.schema';
+import { User, WorkoutPlans } from './schemas/user.schema';
 
 @Injectable()
 export class UserService {
@@ -22,21 +22,26 @@ export class UserService {
     return user;
   }
 
-  async updateWorkouts(newWorkout: Workout, uuid: string): Promise<QueryOptions> {
+  async updateWorkouts(
+    newWorkout: WorkoutPlans,
+    uuid: string,
+  ): Promise<QueryOptions> {
     const user = await this.userModel.findOne({ user_id: uuid }).exec();
-    let newUserWorkouts: Workout[] = [];
+    let newUserWorkouts: WorkoutPlans[] = [];
     if (
-
       user.workout_plans.filter(
         (plan) => plan.workout_id === newWorkout.workout_id,
       ).length > 0
     ) {
-      if (newWorkout.workout.length>0){
-      newUserWorkouts = user.workout_plans.map((plan) => {
-        return plan.workout_id === newWorkout.workout_id ? newWorkout : plan;
-      })}else{
-        newUserWorkouts =  user.workout_plans.filter((workout)=>workout.workout_id!=newWorkout.workout_id);
-      };
+      if (newWorkout.workout.length > 0) {
+        newUserWorkouts = user.workout_plans.map((plan) => {
+          return plan.workout_id === newWorkout.workout_id ? newWorkout : plan;
+        });
+      } else {
+        newUserWorkouts = user.workout_plans.filter(
+          (workout) => workout.workout_id != newWorkout.workout_id,
+        );
+      }
     } else {
       newUserWorkouts = [...user.workout_plans, newWorkout];
     }

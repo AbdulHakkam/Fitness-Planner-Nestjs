@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User, Workout } from './schemas/user.schema';
+import { User, WorkoutPlans } from './schemas/user.schema';
 import { QueryOptions } from 'mongoose';
 
 @Controller('user')
@@ -21,7 +21,7 @@ export class UserController {
     @Param('id')
     id: string,
     @Body()
-    workout: Workout,
+    workout: WorkoutPlans,
   ): Promise<QueryOptions> {
     return this.userService.updateWorkouts(workout, id);
   }
