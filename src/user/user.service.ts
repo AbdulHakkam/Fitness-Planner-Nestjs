@@ -1,54 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Query, QueryOptions } from 'mongoose';
-import { User, WorkoutPlans } from './schemas/user.schema';
+import mongoose from 'mongoose';
+import { User } from './schemas/user.schema';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name)
-    private userModel: mongoose.Model<User>,
+    private userModel: mongoose.Model<User>
   ) {}
 
   async getUser(uuid: string): Promise<User> {
-    const user = await this.userModel.findOne({ user_id: uuid }).exec();
-    if (!user) {
+    const user = await this.userModel.aggregate([
+      { $match: { user_id: uuid } },
+      {
+        $lookup: {
+          from: 'workouts',
+          let: { workout_plans: '$workout_plans' },
+          pipeline: [
+            { $match: { $expr: { $in: ['$_id', '$$workout_plans'] } } },
+            // Add additional stages here
+          ],
+          as: 'workouts',
+        },
+      },
+      {
+        $project: {
+          user_id: 1,
+          'workouts._id': 1,
+          'workouts.workout_name': 1,
+          'workouts.creator_id': 1,
+          'workouts.workout': 1,
+        },
+      },
+    ]);
+    if (user.length < 1) {
       const newUser = new this.userModel({
         user_id: uuid,
         workout_plans: [],
       });
       return this.userModel.create(newUser);
     }
-    return user;
+    return user[0];
   }
 
-  async updateWorkouts(
-    newWorkout: WorkoutPlans,
-    uuid: string,
-  ): Promise<QueryOptions> {
-    const user = await this.userModel.findOne({ user_id: uuid }).exec();
-    let newUserWorkouts: WorkoutPlans[] = [];
-    if (
-      user.workout_plans.filter(
-        (plan) => plan.workout_id === newWorkout.workout_id,
-      ).length > 0
-    ) {
-      if (newWorkout.workout.length > 0) {
-        newUserWorkouts = user.workout_plans.map((plan) => {
-          return plan.workout_id === newWorkout.workout_id ? newWorkout : plan;
-        });
-      } else {
-        newUserWorkouts = user.workout_plans.filter(
-          (workout) => workout.workout_id != newWorkout.workout_id,
-        );
-      }
-    } else {
-      newUserWorkouts = [...user.workout_plans, newWorkout];
-    }
-    const res: QueryOptions = await this.userModel.updateOne(
-      { user_id: uuid },
-      { workout_plans: newUserWorkouts },
+  async addWorkout(userId: string, workoutId: string): Promise<User> {
+    return await this.userModel.findOneAndUpdate(
+      { user_id: userId },
+      { $push: { workout_plans: workoutId } }
     );
-    return res;
   }
 }

@@ -1,7 +1,6 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User, WorkoutPlans } from './schemas/user.schema';
-import { QueryOptions } from 'mongoose';
+import { User } from './schemas/user.schema';
 
 @Controller('user')
 export class UserController {
@@ -10,19 +9,8 @@ export class UserController {
   @Get(':id')
   async getUser(
     @Param('id')
-    id: string,
+    id: string
   ): Promise<User> {
     return this.userService.getUser(id);
-  }
-
-  @Post('workout/:id')
-  @HttpCode(200)
-  async updateUserWorkouts(
-    @Param('id')
-    id: string,
-    @Body()
-    workout: WorkoutPlans,
-  ): Promise<QueryOptions> {
-    return this.userService.updateWorkouts(workout, id);
   }
 }
