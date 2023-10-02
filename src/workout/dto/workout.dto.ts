@@ -16,3 +16,11 @@ export class AddWorkoutDto {
   @Type(() => Workout)
   workout: Workout;
 }
+
+export class DeleteWorkoutDto {
+  @IsNotEmpty()
+  workoutId: string;
+
+  @IsNotEmpty()
+  userId: string;
+}

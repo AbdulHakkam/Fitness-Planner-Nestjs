@@ -14,10 +14,11 @@ export class WorkoutService {
   ) {}
 
   async addWorkout(workout: Workout): Promise<Workout> {
+    console.log(workout);
     const newWorkout = await this.workoutModal.create(
       new this.workoutModal(workout)
     );
-    const user = await this.userModel.findOneAndUpdate(
+    await this.userModel.findOneAndUpdate(
       { user_id: workout.creator_id },
       { $push: { workout_plans: newWorkout._id } }
     );
@@ -36,5 +37,13 @@ export class WorkoutService {
       throw new HttpException('Workout not found', HttpStatus.NOT_FOUND);
     }
     return workout;
+  }
+
+  async delWorkout(workoutId: string, userId: string) {
+    await this.workoutModal.deleteOne({ _id: workoutId });
+    await this.userModel.findOneAndUpdate(
+      { user_id: userId },
+      { $pull: { workout_plans: new mongoose.Types.ObjectId(workoutId) } }
+    );
   }
 }
