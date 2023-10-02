@@ -1,7 +1,11 @@
-import { Body, Controller, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Patch, Post } from '@nestjs/common';
 import { WorkoutService } from './workout.service';
 import { Workout } from './schemas/workout.schema';
-import { AddWorkoutDto, PatchWorkoutDto } from './dto/workout.dto';
+import {
+  AddWorkoutDto,
+  DeleteWorkoutDto,
+  PatchWorkoutDto,
+} from './dto/workout.dto';
 
 @Controller('workout')
 export class WorkoutController {
@@ -22,6 +26,17 @@ export class WorkoutController {
     return this.workoutService.patchWorkout(
       patchWorkoutDto.workoutId,
       patchWorkoutDto.workout
+    );
+  }
+
+  @Delete()
+  async delWorkout(
+    @Body()
+    deleteWorkoutDto: DeleteWorkoutDto
+  ) {
+    this.workoutService.delWorkout(
+      deleteWorkoutDto.workoutId,
+      deleteWorkoutDto.userId
     );
   }
 }
